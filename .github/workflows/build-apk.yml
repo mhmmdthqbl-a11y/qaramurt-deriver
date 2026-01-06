@@ -1,0 +1,54 @@
+name: Build Qaramurt Taxi Driver APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:   # Allows manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Decode Keystore
+        env:
+          ENCODED_KEYSTORE: ${{ secrets.KEYSTORE }}
+        run: echo "$ENCODED_KEYSTORE" | base64 -d > android/app/qaramurt.keystore
+
+      - name: Create signing properties
+        run: |
+          echo "storeFile=qaramurt.keystore" >> android/app/signing.properties
+          echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> android/app/signing.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/app/signing.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/app/signing.properties
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Build Release APK
+        working-directory: ./android
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Qaramurt-Taxi-Driver-APK
+          path: android/app/build/outputs/apk/release/app-release.apk
