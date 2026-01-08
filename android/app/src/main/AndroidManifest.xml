@@ -37,10 +37,6 @@
             android:value="AIzaSyAM_yzWXR0sgNHhxX2ZY6SChwGzBa0K3DM" /> 
 
         <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="google ads id here" />
-
-        <meta-data
             android:name="com.dieam.reactnativepushnotification.notification_foreground"
             android:value="false" />
         <meta-data
